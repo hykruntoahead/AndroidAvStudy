@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ffmpeg_study</string>
+    <string name="frist_integrated">FristIntegrated</string>
+    <string name="play_video">PlayVideo</string>
 </resources>

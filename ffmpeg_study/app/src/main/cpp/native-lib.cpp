@@ -15,7 +15,7 @@ extern "C" {
 #include <libavfilter/avfilter.h>
 
 jstring
-Java_com_ykhe_ffmpeg_1study_MainActivity_stringFromJNI(
+Java_com_ykhe_ffmpeg_1study_FirstIntegratedActivity_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     std::string hello = "Hello from C++";
@@ -23,7 +23,7 @@ Java_com_ykhe_ffmpeg_1study_MainActivity_stringFromJNI(
 }
 
 jstring
-Java_com_ykhe_ffmpeg_1study_MainActivity_urlprotocolinfo(
+Java_com_ykhe_ffmpeg_1study_FirstIntegratedActivity_urlprotocolinfo(
         JNIEnv *env, jobject) {
     char info[40000] = {0};
     av_register_all();
@@ -45,7 +45,7 @@ Java_com_ykhe_ffmpeg_1study_MainActivity_urlprotocolinfo(
 }
 
 jstring
-Java_com_ykhe_ffmpeg_1study_MainActivity_avformatinfo(
+Java_com_ykhe_ffmpeg_1study_FirstIntegratedActivity_avformatinfo(
         JNIEnv *env, jobject) {
     char info[40000] = {0};
 
@@ -65,7 +65,7 @@ Java_com_ykhe_ffmpeg_1study_MainActivity_avformatinfo(
 }
 
 jstring
-Java_com_ykhe_ffmpeg_1study_MainActivity_avcodecinfo(
+Java_com_ykhe_ffmpeg_1study_FirstIntegratedActivity_avcodecinfo(
         JNIEnv *env, jobject) {
     char info[40000] = {0};
 
@@ -98,7 +98,7 @@ Java_com_ykhe_ffmpeg_1study_MainActivity_avcodecinfo(
 }
 
 jstring
-Java_com_ykhe_ffmpeg_1study_MainActivity_avfilterinfo(
+Java_com_ykhe_ffmpeg_1study_FirstIntegratedActivity_avfilterinfo(
         JNIEnv *env, jobject) {
     char info[40000] = {0};
     avfilter_register_all();

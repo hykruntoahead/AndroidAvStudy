@@ -73,6 +73,12 @@ add_library(
              SHARED
              native-lib.cpp )
 
+add_library(
+        native-lib-paly-video
+        SHARED
+        native-lib-paly-video.cpp )
+
+
 include_directories(../../../src/main/jniLibs/include)
 target_link_libraries(native-lib avcodec avfilter avformat avutil swresample swscale
                        ${log-lib} )

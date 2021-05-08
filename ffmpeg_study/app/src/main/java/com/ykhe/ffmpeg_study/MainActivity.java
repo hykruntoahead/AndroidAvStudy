@@ -1,72 +1,49 @@
 package com.ykhe.ffmpeg_study;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.ArrayMap;
+import android.view.View;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-
+/**
+ * author: ykhe
+ * date: 21-5-8
+ * email: ykhe@grandstream.cn
+ * description:
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    TextView tv;
-    Button protocol;
-    Button format;
-    Button codec;
-    Button filter;
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
+    ArrayMap<Integer,Class> arrayMap = new ArrayMap<>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        protocol = (Button) findViewById(R.id.btn_protocol);
-        format = (Button) findViewById(R.id.btn_format);
-        codec = (Button) findViewById(R.id.btn_codec);
-        filter = (Button) findViewById(R.id.btn_filter);
-        protocol.setOnClickListener(this);
-        format.setOnClickListener(this);
-        codec.setOnClickListener(this);
-        filter.setOnClickListener(this);
-
-        // Example of a call to a native method
-        tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        adaptBtnLaunchActivity();
+        addBtnClickListeners();
     }
 
 
-    public native String stringFromJNI();
+    private void adaptBtnLaunchActivity() {
+        arrayMap.put(R.id.btn_frist_integrated,FirstIntegratedActivity.class);
+        arrayMap.put(R.id.btn_play_video, PlayVideoActivity.class);
+    }
 
-    public native String urlprotocolinfo();
+    private void addBtnClickListeners() {
+        for (int btnId : arrayMap.keySet()) {
+            addBtnClickListener(btnId);
+        }
+    }
 
-    public native String avformatinfo();
 
-    public native String avcodecinfo();
-
-    public native String avfilterinfo();
+    private void addBtnClickListener(int btnId) {
+        findViewById(btnId).setOnClickListener(this);
+    }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_protocol:
-                tv.setText(urlprotocolinfo());
-                break;
-            case R.id.btn_format:
-                tv.setText(avformatinfo());
-                break;
-            case R.id.btn_codec:
-                tv.setText(avcodecinfo());
-                break;
-            case R.id.btn_filter:
-                tv.setText(avfilterinfo());
-                break;
-            default:
-                break;
-        }
+        startActivity(new Intent(this,arrayMap.get(v.getId())));
     }
 }
