@@ -1,84 +1,57 @@
+# Sets the minimum version of CMake required to build the native library.
+cmake_minimum_required(VERSION 3.10.1)
 
-cmake_minimum_required(VERSION 3.10.2)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-project("ffmpeg_study")
+set(jnilibs ${CMAKE_SOURCE_DIR}/../jniLibs)
+set(libname learn-ffmpeg)
 
+include_directories(
+        include
+        ${CMAKE_SOURCE_DIR}/util
+)
 
-find_library(log-lib
-        log )
+link_directories(
+        ${jnilibs}/${ANDROID_ABI})
 
+file(GLOB src-files
+        ${CMAKE_SOURCE_DIR}/*.cpp)
 
-message("PROJECT_SOURCE_DIR = ${PROJECT_SOURCE_DIR}")
-set(distribution_DIR  ${PROJECT_SOURCE_DIR}/../jniLibs/armeabi)
+add_library( # Sets the name of the library.
+        ${libname}
 
-#====
-# libavcodec
-add_library(avcodec
+        # Sets the library as a shared library.
         SHARED
-        IMPORTED)
-set_target_properties(avcodec
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libavcodec.so)
 
-# avfilter
-add_library(avfilter
-        SHARED
-        IMPORTED)
-set_target_properties(avfilter
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libavfilter.so)
+        # Provides a relative path to your source file(s).
+        ${src-files}
+        )
 
-# libavformat
-add_library(avformat
-        SHARED
-        IMPORTED)
-set_target_properties(avformat
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libavformat.so)
+set(third-party-libs
+        avformat
+        avcodec
+        avfilter
+        swresample
+        swscale
+        avutil
+        )
 
-# libavutil
-add_library(avutil
-        SHARED
-        IMPORTED )
-set_target_properties(avutil
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libavutil.so)
+set(native-libs
+        android
+        EGL
+        GLESv3
+        OpenSLES
+        log
+        m
+        z
+        )
 
+target_link_libraries( # Specifies the target library.
+        ${libname}
 
-
-# libswresample
-add_library(swresample
-        SHARED
-        IMPORTED)
-set_target_properties(swresample
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libswresample.so)
-
-# libswscale
-add_library(swscale
-        SHARED
-        IMPORTED)
-set_target_properties(swscale
-        PROPERTIES IMPORTED_LOCATION
-        ${distribution_DIR}/libswscale.so)
-
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-
-#======
-
-
-add_library(
-             native-lib
-             SHARED
-             native-lib.cpp )
-
-add_library(
-        native-lib-paly-video
-        SHARED
-        native-lib-paly-video.cpp )
-
-
-include_directories(../../../src/main/jniLibs/include)
-target_link_libraries(native-lib avcodec avfilter avformat avutil swresample swscale
-                       ${log-lib} )
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib}
+        ${third-party-libs}
+        ${native-libs}
+        )
