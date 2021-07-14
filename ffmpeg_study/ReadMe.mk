@@ -20,6 +20,7 @@
     ffmpeg-4.2.2
 
  编译前准备：
+ 
  ```
    #1. 下载 ffmpeg-4.2.2
    wget https://ffmpeg.org/releases/ffmpeg-4.2.2.tar.bz2
@@ -32,9 +33,10 @@
    #4.　下载ndk android-ndk-r20b-linux-x86_64
       https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip?hl=zh_cn
  ```
+ 
 　在 FFmpeg 4.2.2 解压目录下创建编译脚本 build_android_arm64-v8a_clang.sh：
 
-　```
+```
 	#!/bin/bash
 
     export NDK=/root/workspace/android-ndk-r20b #这里配置先你的 NDK 路径
@@ -95,10 +97,10 @@
     OPTIMIZE_CFLAGS="-march=$CPU"
 
     build_android
-  ```
+```
   编译 FFmpeg Android 平台的 64 位动态库和静态库：
 
-  ```
+```
    # 修改 build_android_arm64-v8a_clang.sh 可执行权限
    chmod +x build_android_arm64-v8a_clang.sh
    # 运行编译脚本
@@ -108,7 +110,7 @@
   cd 到　android/armv8-a/lib/下即可看到编译的so,a文件(对应六个模块的静态库和动态库).
 
   若要编译成 32 位的库，则需修改对应的编译脚本：
-  ```
+```
 	#armv7-a
 	ARCH=arm
 	CPU=armv7-a
@@ -119,7 +121,7 @@
 	CROSS_PREFIX=$TOOLCHAIN/bin/arm-linux-androideabi-
 	PREFIX=$(pwd)/android/$CPU
 	OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU "
-  ```
+```
 
 
 
