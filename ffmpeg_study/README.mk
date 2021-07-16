@@ -123,7 +123,10 @@
 	OPTIMIZE_CFLAGS="-mfloat-abi=softfp -mfpu=vfp -marm -march=$CPU "
 ```
 
-
+### -1.Android 视频解码器
+  // 将输入的视频数据解码成YUV像素数据
+  > ffmpeg_study/app/src/main/cpp/learn_ffmpeg.cpp
+  
 
 ### 1. Android FFmpeg视频解码播放
 
