@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void adaptBtnLaunchActivity() {
         arrayMap.put(R.id.btn_frist_integrated,FirstIntegratedActivity.class);
-//        arrayMap.put(R.id.btn_play_video, PlayVideoActivity.class);
+        arrayMap.put(R.id.btn_toYuv, ContainerToYuvActivity.class);
     }
 
     private void addBtnClickListeners() {

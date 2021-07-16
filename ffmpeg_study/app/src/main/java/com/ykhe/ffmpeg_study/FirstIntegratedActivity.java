@@ -11,10 +11,6 @@ import android.widget.TextView;
 public class FirstIntegratedActivity extends AppCompatActivity {
 
     TextView tv;
-    Button protocol;
-    Button format;
-    Button codec;
-    Button filter;
 
 
     @Override
@@ -22,15 +18,6 @@ public class FirstIntegratedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first_integrated);
 //
-//        protocol = (Button) findViewById(R.id.btn_protocol);
-//        format = (Button) findViewById(R.id.btn_format);
-//        codec = (Button) findViewById(R.id.btn_codec);
-//        filter = (Button) findViewById(R.id.btn_filter);
-//        protocol.setOnClickListener(this);
-//        format.setOnClickListener(this);
-//        codec.setOnClickListener(this);
-//        filter.setOnClickListener(this);
-
         // Example of a call to a native method
         tv = findViewById(R.id.sample_text);
         tv.setText(native_GetFFmpegVersion());
