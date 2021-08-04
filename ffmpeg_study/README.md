@@ -222,4 +222,14 @@ graph TB;
 
 ### 1.3.2 ffmpeg工具的使用
 
+ffmpeg是一个非常快的视频/音频转换器，其也可以现场抓取音频/视频源，并在任意采样率、尺寸之间调整视频，以及提供多种高品质的滤镜系统。
+
+- ffmpeg 对视频进行各种处理(转码、缩放等)；
+- ffplay播放器；
+-ffprobe 查看多媒体文件的信息。
+
+缩放: ffmpeg -i input.mp4 -s 100x100 output.mp4
+播放：ffplay -i input.mp4
+查看：ffprobe -i input.mp4
+
 ![ffmpeg 翻译文档](https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html)
