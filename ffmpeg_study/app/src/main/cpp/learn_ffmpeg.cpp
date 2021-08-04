@@ -238,7 +238,7 @@ Java_com_ykhe_ffmpeg_1study_ContainerToYuvActivity_decode(JNIEnv *env, jobject t
     LOGI("ContainerToYuv","av_image_fill_arrays");
 
     // AVPacket是FFmpeg中很重要的一个数据结构
-    // 它保存了解复用之后，解码之前的数据（仍然是压缩后的数据）和关于这些数据的一些附加信息，
+    // 它保存了 解复用之后，解码之前的数据（仍然是压缩后的数据）和关于这些数据的一些附加信息，
     // 如显示时间戳（pts）、解码时间戳（dts）、数据时长，所在媒体流的索引等。
     packet = (AVPacket *) av_malloc(sizeof(AVPacket));
 
