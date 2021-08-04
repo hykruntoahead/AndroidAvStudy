@@ -149,7 +149,7 @@
 | postproc | 用于后期效果的处理 |
 
 FFmpeg 就是依靠以上几个库，实现了强大的音视频**编码、解码、编辑、转换、采集**等能力.
-
+https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html
 $\color{Pink} FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.
 
 #### 1.2 FFmpeg 解码流程简介
@@ -222,3 +222,4 @@ graph TB;
 
 ### 1.3.2 ffmpeg工具的使用
 
+![ffmpeg 翻译文档](https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html)
