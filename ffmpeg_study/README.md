@@ -116,7 +116,7 @@
 	CPU=armv7-a
 	API=21
 	CC=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang
-	CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang++
+	CXX=$TOOLCHAIN/bin/armv7a-linux-androideabi$API-clang++<font color="#dd0000">
 	SYSROOT=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot
 	CROSS_PREFIX=$TOOLCHAIN/bin/arm-linux-androideabi-
 	PREFIX=$(pwd)/android/$CPU
@@ -149,8 +149,8 @@
 | postproc | 用于后期效果的处理 |
 
 FFmpeg 就是依靠以上几个库，实现了强大的音视频**编码、解码、编辑、转换、采集**等能力.
-https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html
-$\color{Pink} FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.
+ 
+<font color="#cc0000"> FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.</font>
 
 #### 1.2 FFmpeg 解码流程简介
 
