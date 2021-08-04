@@ -150,7 +150,7 @@
 
 FFmpeg 就是依靠以上几个库，实现了强大的音视频**编码、解码、编辑、转换、采集**等能力.
  
-<font color="#cc0000"> FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.</font>
+**FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.**
 
 #### 1.2 FFmpeg 解码流程简介
 
@@ -184,6 +184,7 @@ FFmpeg 初始化的流程相对　Android 原生硬解码来说还是比较琐�
 - 初始化结束
 
 其中，有几个 结构体 比较重要，分别是 AVFormatContext(format_ctx)、AVCodecContext(codec_ctx)、AVCodec(codec)．
+
 - AVFormatContext: 属于avformat库，存放着码流数据的上下文，主要用于音视频的*封装*和*解封*
 - AVCodecContext: 属于avcodec库，存放编解码器参数上下文，主要用于对音视频数据进行*编码*和*解码*
 - ACCodec: 属于avcodec库，音视频编解码器，真正的**编解码执行者**.
@@ -191,14 +192,14 @@ FFmpeg 初始化的流程相对　Android 原生硬解码来说还是比较琐�
 ##### 1.2.2 FFmpeg　解码循环
 
 解码过程：
-1.解码开始
-2.从音视频流中提取帧数据(avpacket:av_read_frame)->3;
-3.将帧数据avpacket送入解码(avcodec_send_packet)->4;
-4.提取解码完成的数据(frame:avcodec_receive_frame)->5;
-5.释放数据流packet(av_packet_unref) -> 6;
-6.frame == null ? Y->8 : N->7;
-7.渲染 ->2;
-8.解码结束.
+1. 解码开始
+2. 从音视频流中提取帧数据(avpacket:av_read_frame)->3;
+3. 将帧数据avpacket送入解码(avcodec_send_packet)->4;
+4. 提取解码完成的数据(frame:avcodec_receive_frame)->5;
+5. 释放数据流packet(av_packet_unref) -> 6;
+6. frame == null ? Y->8 : N->7;
+7. 渲染 ->2;
+8. 解码结束.
 
 从上面流程可以看到，FFmpeg 首先将数据提取为一个 AVPacket（avpacket），然后通过解码，将数据解码为一帧可以渲染的数据，
 称为 AVFrame（frame）．
