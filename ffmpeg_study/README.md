@@ -20,7 +20,7 @@
     ffmpeg-4.2.2
 
  编译前准备：
- 
+
  ```
    #1. 下载 ffmpeg-4.2.2
    wget https://ffmpeg.org/releases/ffmpeg-4.2.2.tar.bz2
@@ -33,7 +33,7 @@
    #4.　下载ndk android-ndk-r20b-linux-x86_64
       https://dl.google.com/android/repository/android-ndk-r20b-linux-x86_64.zip?hl=zh_cn
  ```
- 
+
 　在 FFmpeg 4.2.2 解压目录下创建编译脚本 build_android_arm64-v8a_clang.sh：
 
 ```
@@ -105,7 +105,7 @@
    chmod +x build_android_arm64-v8a_clang.sh
    # 运行编译脚本
    ./build_android_arm64-v8a_clang.sh
-  ```
+```
   编译成功后有日志　build android arm64-v8a success打印．
   cd 到　android/armv8-a/lib/下即可看到编译的so,a文件(对应六个模块的静态库和动态库).
 
@@ -126,7 +126,7 @@
 ### -1.Android 视频解码器
   // 将输入的视频数据解码成YUV像素数据
   > ffmpeg_study/app/src/main/cpp/learn_ffmpeg.cpp
-  
+
 
 ### 1. Android FFmpeg视频解码播放
 
@@ -149,7 +149,7 @@
 | postproc | 用于后期效果的处理 |
 
 FFmpeg 就是依靠以上几个库，实现了强大的音视频**编码、解码、编辑、转换、采集**等能力.
- 
+
 **FFmpeg实际上也是一个引擎,能够集成包括librtmp,libmap3lame等第三方库,以FFmpeg统一接口使用.**
 
 #### 1.2 FFmpeg 解码流程简介
@@ -241,3 +241,27 @@ ffmpeg是一个非常快的视频/音频转换器，其也可以现场抓取音�
 - AvFrame：解码后的数据结构体；
 - AVFormatContext：媒体文件的构成和基本信息上下文；
 - AVCodecContext: 解码信息上下文；
+
+
+
+解码流程(主要方法):
+
+```mermaid
+graph TB
+	start[Start] -->|开启网络支持|network_init[avformat_network_init]
+	network_init -->|打开输入媒体文件|open_input[avformat_open_input]
+	open_input -->|获取媒体流信息|find_stream[avformat_find_stream_info]
+	find_stream -->|查找匹配解码器|find_decoder[avcodec_find_decoder]
+	find_decoder -->|打开解码器|open_decoder[avcodec_open2]
+	open_decoder -->|从输入文件读取一帧压缩数据|read_frame[av_read_frame]
+	read_frame -->get_package{Get Packet?}
+	get_package -->|false|close
+	get_package -->|true:获取压缩数据|av_packet[AVPacket]
+	
+	
+	av_packet -->|发送给解码器|send_packet[avcodec_send_packet]
+	send_packet -->|从解码器获得解码数据|receive_frame[avcodec_receive_frame]
+	receive_frame -->|获取音视频原始数据|av_frame[AVFrame]
+	av_frame -->|Show on Display|read_frame
+   
+```
