@@ -234,3 +234,10 @@ ffmpeg是一个非常快的视频/音频转换器，其也可以现场抓取音�
 查看：ffprobe -i input.mp4
 
 ![ffmpeg 翻译文档](https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html)
+
+#### 2.3 主要结构体及函数
+
+- AVPacket：解码前的数据结构体；
+- AvFrame：解码后的数据结构体；
+- AVFormatContext：媒体文件的构成和基本信息上下文；
+- AVCodecContext: 解码信息上下文；
