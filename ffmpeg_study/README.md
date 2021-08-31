@@ -227,13 +227,13 @@ ffmpeg是一个非常快的视频/音频转换器，其也可以现场抓取音�
 
 - ffmpeg 对视频进行各种处理(转码、缩放等)；
 - ffplay播放器；
--ffprobe 查看多媒体文件的信息。
+- ffprobe 查看多媒体文件的信息。
 
 缩放: ffmpeg -i input.mp4 -s 100x100 output.mp4
 播放：ffplay -i input.mp4
 查看：ffprobe -i input.mp4
 
-![ffmpeg 翻译文档](https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html)
+[ffmpeg 翻译文档](https://xdsnet.gitbooks.io/other-doc-cn-ffmpeg/content/index.html)
 
 #### 2.3 主要结构体及函数
 
