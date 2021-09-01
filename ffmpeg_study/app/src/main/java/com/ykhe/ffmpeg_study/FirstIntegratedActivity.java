@@ -23,10 +23,5 @@ public class FirstIntegratedActivity extends AppCompatActivity {
         tv.setText(native_GetFFmpegVersion());
     }
 
-    static {
-        System.loadLibrary("learn-ffmpeg");
-    }
-
-
     private static native String native_GetFFmpegVersion();
 }

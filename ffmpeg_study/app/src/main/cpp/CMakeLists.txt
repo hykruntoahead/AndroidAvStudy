@@ -15,14 +15,13 @@ link_directories(
         ${jnilibs}/${ANDROID_ABI})
 
 file(GLOB src-files
-        ${CMAKE_SOURCE_DIR}/*.cpp)
+        ${CMAKE_SOURCE_DIR}/*.cpp
+        ${CMAKE_SOURCE_DIR}/player/* )
 
 add_library( # Sets the name of the library.
         ${libname}
-
         # Sets the library as a shared library.
         SHARED
-
         # Provides a relative path to your source file(s).
         ${src-files}
         )

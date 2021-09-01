@@ -17,11 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
  */
 public class ContainerToYuvActivity extends AppCompatActivity {
 
-    static {
-        System.loadLibrary("learn-ffmpeg");
-    }
-
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

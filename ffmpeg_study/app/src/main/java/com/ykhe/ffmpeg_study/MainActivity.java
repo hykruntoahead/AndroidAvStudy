@@ -8,6 +8,8 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.ykhe.ffmpeg_study.player.PlayerActivity;
+
 /**
  * author: ykhe
  * date: 21-5-8
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void adaptBtnLaunchActivity() {
         arrayMap.put(R.id.btn_frist_integrated,FirstIntegratedActivity.class);
         arrayMap.put(R.id.btn_toYuv, ContainerToYuvActivity.class);
+        arrayMap.put(R.id.btn_player, PlayerActivity.class);
     }
 
     private void addBtnClickListeners() {

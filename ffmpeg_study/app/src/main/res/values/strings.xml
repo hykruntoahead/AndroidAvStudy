@@ -2,4 +2,6 @@
     <string name="app_name">ffmpeg_study</string>
     <string name="frist_integrated">FristIntegrated</string>
     <string name="play_video">PlayVideo</string>
+    <string name="toyuv">toYuv</string>
+    <string name="toplay">toPlay</string>
 </resources>

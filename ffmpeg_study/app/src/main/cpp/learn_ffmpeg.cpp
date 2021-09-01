@@ -434,7 +434,6 @@ Java_com_ykhe_ffmpeg_1study_ContainerToYuvActivity_decode(JNIEnv *env, jobject t
     return 0;
 }
 
-
 #ifdef __cplusplus
 }
 #endif

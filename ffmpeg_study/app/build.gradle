@@ -21,8 +21,8 @@ android {
         }
 
         ndk {
-            //我们只有armeabi就只配置这个就行
-            abiFilters  'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            //我们只有armeabi就只配置这个就行 /** 'arm64-v8a', 'x86', 'x86_64'**/
+            abiFilters  'armeabi-v7a'
         }
 
     }
