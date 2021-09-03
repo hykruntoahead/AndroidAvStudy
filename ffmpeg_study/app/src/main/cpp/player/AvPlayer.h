@@ -4,41 +4,47 @@
 
 #ifndef FFMPEG_STUDY_AVPLAYER_H
 #define FFMPEG_STUDY_AVPLAYER_H
+
 #include <pthread.h>
 #include "../util/LogUtil.h"
-#ifdef __cplusplus
+#include "JavaCallbackHelper.h"
+#include "VideoChannel.h"
+
 extern "C" {
-#endif
-
-#include <libavcodec/version.h>
-#include <libavcodec/avcodec.h>
-#include <libavformat/version.h>
-#include <libavutil/version.h>
-#include <libavfilter/version.h>
-#include <libswresample/version.h>
-#include <libswscale/version.h>
 #include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
-
-#ifdef __cplusplus
 }
-#endif
 
 class AvPlayer {
-    const char * TAG = "NativeAvPlayer";
+    const char *TAG = "NativeAvPlayer";
 
-    friend void* prepare_t(void *args);
+    friend void *prepare_t(void *args);
 
-    private:
-        char* path;
-        pthread_t prepareTd;
+    friend void *start_t(void *args);
 
-    public:
-        AvPlayer();
-        void setDataSource(const char* path_);
-        void prepare();
-        void _prepare_t();
+public:
+    AvPlayer(JavaCallbackHelper *helper);
+
+public:
+    void setDataSource(const char *path_);
+    void prepare();
+    void start();
+
+
+private:
+    char *path;
+    pthread_t prepareTd;
+    JavaCallbackHelper *helper;
+    int64_t duration;
+    VideoChannel *videoChannel;
+
+    pthread_t startTask;
+    bool isPlaying;
+    AVFormatContext *avFormatContext;
+
+private:
+    void _prepare_t();
+
+    void _start_t();
 };
 
 

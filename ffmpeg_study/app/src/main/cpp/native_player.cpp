@@ -11,12 +11,19 @@
 
 #define TAG = "Native_Player"
 
+JavaVM *javaVm = nullptr;
+
+JNIEXPORT jint JNICALL
+JNI_OnLoad(JavaVM *vm,void *reserved){
+    javaVm = vm;
+    return JNI_VERSION_1_4;
+}
+
 extern "C"
 {
-
 JNIEXPORT jlong JNICALL
 Java_com_ykhe_ffmpeg_1study_player_AVPlayer_nativeInit(JNIEnv *env, jobject thiz) {
-    auto* avPlayer = new AvPlayer();
+    auto *avPlayer = new AvPlayer(new JavaCallbackHelper(javaVm, env, thiz));
 
     return reinterpret_cast<jlong>(avPlayer);
 }
@@ -25,10 +32,10 @@ Java_com_ykhe_ffmpeg_1study_player_AVPlayer_nativeInit(JNIEnv *env, jobject thiz
 JNIEXPORT void JNICALL
 Java_com_ykhe_ffmpeg_1study_player_AVPlayer_setDataSource(JNIEnv *env, jobject thiz,
                                                           jlong native_handle, jstring path) {
-        auto *avplay = reinterpret_cast<AvPlayer *>(native_handle);
-        const char* path_ = env->GetStringUTFChars(path, nullptr);
-        avplay->setDataSource(path_);
-        env->ReleaseStringUTFChars(path,path_);
+    auto *avplay = reinterpret_cast<AvPlayer *>(native_handle);
+    const char *path_ = env->GetStringUTFChars(path, nullptr);
+    avplay->setDataSource(path_);
+    env->ReleaseStringUTFChars(path, path_);
 
 }
 
@@ -37,5 +44,11 @@ Java_com_ykhe_ffmpeg_1study_player_AVPlayer_prepare(JNIEnv *env, jobject thiz,
                                                     jlong native_handle) {
     auto *avplay = reinterpret_cast<AvPlayer *>(native_handle);
     avplay->prepare();
+}
+
+JNIEXPORT void JNICALL
+Java_com_ykhe_ffmpeg_1study_player_AVPlayer_start(JNIEnv *env, jobject thiz, jlong native_handle) {
+    auto *avplay = reinterpret_cast<AvPlayer *>(native_handle);
+    avplay->start();
 }
 }
