@@ -129,6 +129,7 @@ void *start_t(void *args) {
 void AvPlayer::start() {
     //1.读取媒体源数据
     //2.根据数据类型放入　Audio/VideoChannel的队列中
+    LOGD(TAG,"start called");
     isPlaying = true;
     if (videoChannel){
         videoChannel->play();
@@ -160,6 +161,14 @@ void AvPlayer::_start_t() {
     }
     isPlaying = false;
     videoChannel->stop();
+}
+
+void AvPlayer::setWindow(ANativeWindow *nativeWindow) {
+    this->window = nativeWindow;
+    if(videoChannel){
+        LOGD(TAG,"videoChannel setWindow called")
+        videoChannel->setWindow(nativeWindow);
+    }
 }
 
 

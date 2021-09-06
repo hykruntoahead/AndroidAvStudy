@@ -1,6 +1,7 @@
 package com.ykhe.ffmpeg_study.player;
 
 import android.util.Log;
+import android.view.Surface;
 
 /**
  * author: ykhe
@@ -24,15 +25,15 @@ public class AVPlayer {
         Log.d(TAG, "AVPlayer: initAvPlayer and handle is:"+nativeHandle);
     }
 
-    public void setErrorListener(OnErrorListener errorListener) {
+    public void setOnErrorListener(OnErrorListener errorListener) {
         this.errorListener = errorListener;
     }
 
-    public void setPreparedListener(OnPreparedListener preparedListener) {
+    public void setOnPreparedListener(OnPreparedListener preparedListener) {
         this.preparedListener = preparedListener;
     }
 
-    public void setProgressListener(OnProgressListener progressListener) {
+    public void setOnProgressListener(OnProgressListener progressListener) {
         this.progressListener = progressListener;
     }
 
@@ -45,15 +46,15 @@ public class AVPlayer {
         prepare(nativeHandle);
     }
 
-    private void start(){
+    public void start(){
         start(nativeHandle);
     }
 
-    private void stop(){
+    public void stop(){
 
     }
 
-    private void pause(){
+    public void pause(){
 
     }
 
@@ -76,6 +77,10 @@ public class AVPlayer {
         }
     }
 
+    public void setSurface(Surface surface) {
+        setSurface(nativeHandle,surface);
+    }
+
     public interface OnErrorListener{
         void onError(int error);
     }
@@ -93,4 +98,5 @@ public class AVPlayer {
     private native void setDataSource(long nativeHandle,String path);
     private native void prepare(long nativeHandle);
     private native void start(long nativeHandle);
+    private native void setSurface(long nativeHandle, Surface surface);
 }

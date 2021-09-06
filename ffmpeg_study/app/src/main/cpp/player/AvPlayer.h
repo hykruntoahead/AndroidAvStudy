@@ -9,7 +9,7 @@
 #include "../util/LogUtil.h"
 #include "JavaCallbackHelper.h"
 #include "VideoChannel.h"
-
+//#include <android/native_window.h>
 extern "C" {
 #include <libavformat/avformat.h>
 }
@@ -28,7 +28,7 @@ public:
     void setDataSource(const char *path_);
     void prepare();
     void start();
-
+    void setWindow(ANativeWindow *nativeWindow);
 
 private:
     char *path;
@@ -40,6 +40,7 @@ private:
     pthread_t startTask;
     bool isPlaying;
     AVFormatContext *avFormatContext;
+    ANativeWindow *window = 0;
 
 private:
     void _prepare_t();
