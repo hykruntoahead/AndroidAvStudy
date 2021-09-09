@@ -1,11 +1,13 @@
 package com.ykhe.ffmpeg_study.player;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,23 +26,46 @@ import java.io.File;
 public class PlayerActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = "PlayerActivity";
     private AVPlayer avPlayer;
+    private SurfaceView surfaceView;
+    private String path;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         avPlayer = new AVPlayer();
-        String videoPath = getFilesDir() + File.separator +"1.mp4";
+        path = getFilesDir() + File.separator +"1.mp4";
 //        String videoPath = "/sdcard/1.mp4";
-        Log.d(TAG, "onCreate: "+videoPath);
+        Log.d(TAG, "onCreate: "+path);
 
-        SurfaceView surfaceView = findViewById(R.id.surfaceView);
+        surfaceView = findViewById(R.id.surfaceView);
         surfaceView.getHolder().addCallback(this);
 
-        avPlayer.setDataSource(videoPath);
+        avPlayer.setDataSource(path);
         avPlayer.setOnPreparedListener(avPlayer::start);
-        avPlayer.prepare();
-
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        surfaceView.getHolder().removeCallback(this);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager
+                    .LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+        setContentView(R.layout.activity_player);
+        surfaceView = findViewById(R.id.surfaceView);
+        surfaceView.getHolder().addCallback(this);
+        avPlayer.setDataSource(path);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        avPlayer.prepare();
+    }
+
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {

@@ -101,7 +101,7 @@ void AvPlayer::_prepare_t() {
 
         //音频
         if (parameters->codec_type == AVMEDIA_TYPE_AUDIO){
-
+            audioChannel = new AudioChannel(i,helper,codecContext,avStream->time_base);
             //视频
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){
             //获得帧率
@@ -111,8 +111,8 @@ void AvPlayer::_prepare_t() {
         }
     }
 
-    //如果媒体文件中没有视频
-    if (!videoChannel){
+    //如果媒体文件中没有视频 & 没有音频
+    if (!videoChannel && !audioChannel){
         helper->onError(FFMPEG_NOMEDIA,THREAD_CHILD);
         return;
     }
@@ -134,6 +134,11 @@ void AvPlayer::start() {
     if (videoChannel){
         videoChannel->play();
     }
+
+    if(audioChannel){
+        audioChannel->play();
+    }
+
     pthread_create(&startTask,nullptr,start_t,this);
 }
 
@@ -148,6 +153,11 @@ void AvPlayer::_start_t() {
             //为video类型数据包
             if(videoChannel && packet-> stream_index == videoChannel->channelId){
                 videoChannel->pktQueue.enQueue(packet);
+            } else if(audioChannel && packet->stream_index == audioChannel->channelId){
+                LOGD(TAG,"enQueue audioChannel packet")
+                audioChannel->pktQueue.enQueue(packet);
+            } else{
+                av_packet_free(&packet);
             }
         }else if(ret == AVERROR_EOF){
             //读取完毕，不一定播放完毕
@@ -160,6 +170,7 @@ void AvPlayer::_start_t() {
         }
     }
     isPlaying = false;
+    audioChannel->stop();
     videoChannel->stop();
 }
 

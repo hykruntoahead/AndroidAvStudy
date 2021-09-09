@@ -9,6 +9,7 @@
 #include "../util/LogUtil.h"
 #include "JavaCallbackHelper.h"
 #include "VideoChannel.h"
+#include "AudioChannel.h"
 //#include <android/native_window.h>
 extern "C" {
 #include <libavformat/avformat.h>
@@ -36,10 +37,11 @@ private:
     JavaCallbackHelper *helper;
     int64_t duration;
     VideoChannel *videoChannel;
-
+    AudioChannel *audioChannel;
     pthread_t startTask;
     bool isPlaying;
     AVFormatContext *avFormatContext;
+
     ANativeWindow *window = 0;
 
 private:

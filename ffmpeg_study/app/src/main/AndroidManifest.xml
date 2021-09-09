@@ -29,7 +29,10 @@
 
         <activity android:name=".FirstIntegratedActivity" />
         <activity android:name=".ContainerToYuvActivity" />
-        <activity android:name=".player.PlayerActivity" />
+        <activity
+            android:name=".player.PlayerActivity"
+            android:configChanges="orientation|screenLayout|screenSize|keyboardHidden"
+            android:screenOrientation="sensor" />
 
     </application>
 
