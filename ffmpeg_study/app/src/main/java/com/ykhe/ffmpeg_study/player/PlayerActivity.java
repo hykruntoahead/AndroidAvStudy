@@ -33,6 +33,7 @@ public class PlayerActivity extends AppCompatActivity implements SurfaceHolder.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         avPlayer = new AVPlayer();
+//        path = "https://upos-sz-mirrorcos.bilivideo.com/upgcxcode/60/42/408944260/408944260-1-192.mp4";
         path = getFilesDir() + File.separator +"1.mp4";
 //        String videoPath = "/sdcard/1.mp4";
         Log.d(TAG, "onCreate: "+path);
@@ -66,6 +67,13 @@ public class PlayerActivity extends AppCompatActivity implements SurfaceHolder.C
         avPlayer.prepare();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (avPlayer!=null){
+            avPlayer.stop();
+        }
+    }
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {

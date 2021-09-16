@@ -2,7 +2,6 @@
 // Created by hyk on 21-9-9.
 //
 
-#include <LogUtil.h>
 #include "AudioChannel.h"
 
 AudioChannel::AudioChannel(int channelId, JavaCallbackHelper *helper,
@@ -22,7 +21,8 @@ AudioChannel::AudioChannel(int channelId, JavaCallbackHelper *helper,
 }
 
 AudioChannel::~AudioChannel() {
-
+    free(buffer);
+    buffer = nullptr;
 }
 
 
@@ -57,7 +57,18 @@ void AudioChannel::play() {
 }
 
 void AudioChannel::stop() {
+    isPlaying = false;
+    helper = nullptr;
+    setEnable(false);
+    pthread_join(audioDecodeTask, nullptr);
+    pthread_join(audioPlayTask, nullptr);
 
+    _releaseOpenSL();
+
+    if (swrContext){
+        swr_free(&swrContext);
+        swrContext = nullptr;
+    }
 }
 
 //AvPacket -> AvFrame
@@ -86,6 +97,9 @@ void AudioChannel::decode() {
         } else if (ret < 0) {
             break;
         }
+        while (frameQueue.size() > 100 && isPlaying){
+            av_usleep(1000*10);
+        }
         frameQueue.enQueue(frame);
         LOGD(TAG, "AudioChannel::decode enQueue frame")
     }
@@ -107,7 +121,6 @@ void AudioChannel::_play() {
     /**
      * 1.创建引擎
      */
-    SLObjectItf engineObject = nullptr;
     SLresult result;
     result = slCreateEngine(&engineObject, 0, nullptr,
                             0, nullptr, nullptr);
@@ -122,7 +135,6 @@ void AudioChannel::_play() {
     }
 
     //获取引擎接口 engineInterface
-    SLEngineItf engineInterface = nullptr;
     result = (*engineObject)->GetInterface(engineObject,
                                            SL_IID_ENGINE,
                                            &engineInterface);
@@ -134,7 +146,6 @@ void AudioChannel::_play() {
      * 2.创建混音器
      */
     //通过引擎接口创建混音器
-    SLObjectItf outputMixObject = nullptr;
     result = (*engineInterface)->CreateOutputMix(engineInterface,
                                                  &outputMixObject, 0, nullptr, nullptr);
     if (SL_RESULT_SUCCESS != result) {
@@ -172,7 +183,6 @@ void AudioChannel::_play() {
 
     //播放器相当于对混音器进行了一层包装， 提供了额外的如：开始，停止等方法。
     //混音器来播放声音
-    SLObjectItf bqPlayerObject = nullptr;
     (*engineInterface)->CreateAudioPlayer(engineInterface, &bqPlayerObject, &slDataSource,
                                           &audioSink, 1, ids, req);
     LOGD(TAG, "audioChannel  bqPlayerObject　混音器来播放声音");
@@ -182,7 +192,6 @@ void AudioChannel::_play() {
     LOGD(TAG, "audioChannel  bqPlayerObject　初始化播放器");
 
     //获得播放数据队列操作接口
-    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue = nullptr;
     (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_BUFFERQUEUE, &bqPlayerBufferQueue);
 
     //设置回调(启动播放器后执行回调来获取数据并播放)
@@ -191,7 +200,6 @@ void AudioChannel::_play() {
     LOGD(TAG, "audioChannel  bqPlayerObject　启动播放器后执行回调来获取数据并播放");
 
     //获取播放状态接口
-    SLPlayItf bqPlayerInterface = nullptr;
     (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_PLAY, &bqPlayerInterface);
     // 设置播放状态
     (*bqPlayerInterface)->SetPlayState(bqPlayerInterface, SL_PLAYSTATE_PLAYING);
@@ -219,7 +227,40 @@ int AudioChannel::_getData() {
 
         // 采样位:out_sampleSize;声道数:out_channels
         dataSize = nb * out_channels * out_sampleSize;
+
+        //播放这一段声音的时刻
+        clock = avFrame->pts*av_q2d(timeBase);
         break;
     }
+    releaseAvFrame(avFrame);
     return dataSize;
+}
+
+void AudioChannel::_releaseOpenSL() {
+    LOGE(TAG,"停止播放");
+    //设置停止状态
+    if(bqPlayerInterface){
+        (*bqPlayerInterface)->SetPlayState(bqPlayerInterface,SL_PLAYSTATE_STOPPED);
+        bqPlayerInterface = nullptr;
+    }
+    //销毁播放器
+    if (bqPlayerObject){
+        (*bqPlayerObject)->Destroy(bqPlayerObject);
+        bqPlayerObject = nullptr;
+        bqPlayerBufferQueue = nullptr;
+    }
+
+    //销毁混音器
+    if (outputMixObject){
+        (*outputMixObject)->Destroy(outputMixObject);
+        outputMixObject = nullptr;
+    }
+
+    //销毁引擎
+    if (engineObject){
+        (*engineObject)->Destroy(engineObject);
+        engineObject = nullptr;
+        engineInterface = nullptr;
+    }
+
 }

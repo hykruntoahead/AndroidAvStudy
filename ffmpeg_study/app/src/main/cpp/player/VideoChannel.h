@@ -6,6 +6,7 @@
 #define FFMPEG_STUDY_VIDEOCHANNEL_H
 
 #include "BaseChannel.h"
+#include "AudioChannel.h"
 #include <android/native_window_jni.h>
 #include <android/native_window.h>
 
@@ -13,6 +14,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 #include <libavutil/rational.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/time.h>
 };
 
 class VideoChannel : public BaseChannel {
@@ -22,19 +24,22 @@ class VideoChannel : public BaseChannel {
     friend void *videoPlay_t(void *args);
 
 private:
-    int fps;
+    double fps;
     pthread_t videoDecodeTask, videoPlayTask;
     bool isPlaying;
     pthread_mutex_t surfaceMutex;
     ANativeWindow *window = 0;
+public:
+    AudioChannel *audioChannel = nullptr;
 
+private:
     void _play();
 
     void onDraw(uint8_t *data[4], int linesize[4], int width, int height);
 
 public:
     VideoChannel(int channel, JavaCallbackHelper *helper,
-                 AVCodecContext *avCodecContext, const AVRational &base, int fps);
+                 AVCodecContext *avCodecContext, const AVRational &base, double fps);
 
 
     ~VideoChannel();
@@ -47,8 +52,6 @@ public:
     virtual void decode();
 
     void setWindow(ANativeWindow *nativeWindow);
-
-
 };
 
 

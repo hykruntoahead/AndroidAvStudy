@@ -5,8 +5,11 @@
 #include <LogUtil.h>
 #include "VideoChannel.h"
 
+#define AV_SYNC_THRESHOLD_MIN 0.04
+#define AV_SYNC_THRESHOLD_MAX 0.1
+
 VideoChannel::VideoChannel(int channelId, JavaCallbackHelper *helper, AVCodecContext *avCodecContext,
-                           const AVRational &base, int fps):
+                           const AVRational &base, double fps):
                            BaseChannel(channelId,helper,avCodecContext,base) ,fps(fps){
     pthread_mutex_init(&surfaceMutex, nullptr);
 }
@@ -72,6 +75,9 @@ void VideoChannel::decode() {
         }else if(ret < 0){
             break;
         }
+        if (frameQueue.size() > fps*10 && isPlaying){
+            av_usleep(1000*10);
+        }
         frameQueue.enQueue(frame);
     }
     releaseAvPacket(packet);
@@ -105,6 +111,8 @@ void VideoChannel::_play() {
             avCodecContext->height,AV_PIX_FMT_RGBA,1);
 
     AVFrame *frame = nullptr;//解码后待转换的结构体
+    // 1/fps(每秒显示帧数) = 每帧的延时
+    double frame_delay = 1.0 / fps;
     int  ret;
     while (isPlaying){
         //阻塞方法
@@ -117,6 +125,38 @@ void VideoChannel::_play() {
             continue;
         }
 
+        //解码时，该信号表示图片必须延迟多少时间
+        double extra_delay = frame->repeat_pict / (2 * fps);
+        double delay = extra_delay + frame_delay;
+
+        if (audioChannel){
+            //best_effort_timestamp ffmpeg估计的帧时间戳
+            clock = frame->best_effort_timestamp * av_q2d(timeBase);
+            //视频时钟相对于音频时钟的差值
+            double  diff = clock -audioChannel->clock;
+
+            /**
+            * 1、delay < 0.04, 同步阈值就是0.04
+            * 2、delay > 0.1 同步阈值就是0.1
+            * 3、0.04 < delay < 0.1 ，同步阈值是delay
+            */
+            // 根据每秒视频需要播放的图象数，确定音视频的时间差允许范围
+            // 给到一个时间差的允许范围
+            double  sync = FFMAX(AV_SYNC_THRESHOLD_MIN,FFMIN(AV_SYNC_THRESHOLD_MAX,delay));
+
+            //视频落后了 diff就是个负数.　需要同步
+            if (diff <= -sync){
+                //让delay减小
+                delay = FFMAX(0,delay+diff);
+            } else if (diff > sync){
+                //视频快了，让delay久一些等音频赶上来
+                delay = delay + diff;
+            }
+            LOGD(TAG,"Video:%lf Audio:%lf delay:%lf A-V=%lf", clock, audioChannel->clock, delay, -diff);
+        }
+
+        av_usleep(delay * 1000000);
+
         // 2、指针数据，比如RGBA，
         // 每一个维度的数据就是一个指针，那么RGBA需要4个指针，
         // 所以就是4个元素的数组，数组的元素就是指针，指针数据
@@ -128,6 +168,7 @@ void VideoChannel::_play() {
                 frame->height,data,linesize);
         // 绘制
         onDraw(data,linesize,avCodecContext->width,avCodecContext->height);
+        releaseAvFrame(frame);
     }
     av_free(&data[0]);
     isPlaying = false;
@@ -155,7 +196,7 @@ void VideoChannel::onDraw(uint8_t **data, int *linesize, int width, int height) 
     }
 
     //把视频数据刷到buffer
-    uint8_t *dstData = static_cast<uint8_t *>(buffer.bits);
+    auto *dstData = static_cast<uint8_t *>(buffer.bits);
     //window一行需要多少个数据*4(rgba)
     int dstSize = buffer.stride * 4;
 
@@ -176,7 +217,15 @@ void VideoChannel::onDraw(uint8_t **data, int *linesize, int width, int height) 
 
 
 void VideoChannel::stop() {
-
+    isPlaying = false;
+    helper = nullptr;
+    setEnable(false);
+    pthread_join(videoDecodeTask,nullptr);
+    pthread_join(videoPlayTask,nullptr);
+    if (window){
+        ANativeWindow_release(window);
+        window = nullptr;
+    }
 }
 
 void VideoChannel::setWindow(ANativeWindow *nativeWindow) {

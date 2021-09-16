@@ -10,6 +10,16 @@ AvPlayer::AvPlayer(JavaCallbackHelper *helper) : helper(helper){
     videoChannel = nullptr;
 }
 
+AvPlayer::~AvPlayer() {
+    avformat_network_deinit();
+    delete helper;
+    helper = 0;
+    if (path) {
+        delete[] path;
+        path = 0;
+    }
+}
+
 void AvPlayer::setDataSource(const char *path_) {
     //    path  = static_cast< char *>(malloc(strlen(path_) + 1));
     //    memset((void *) path, 0, strlen(path) + 1);
@@ -56,7 +66,7 @@ void AvPlayer::_prepare_t() {
     if (ret != 0){
         LOGE(TAG,"打开 %s 失败,错误码为:%d,错误描述:%s",path,ret,av_err2str(ret));
         helper->onError(FFMPEG_CAN_NOT_OPEN_URL,THREAD_CHILD);
-        return;
+        goto ERROR;
     }
 
     /**
@@ -66,7 +76,7 @@ void AvPlayer::_prepare_t() {
      if (ret < 0){
          LOGE("查找媒体流 %s 失败，返回:%d 错误描述:%s", path, ret, av_err2str(ret));
          helper ->onError(FFMPEG_CAN_NOT_FIND_STREAMS,THREAD_CHILD);
-         return;
+         goto ERROR;
      }
 
      //得到视频时长，单位是s
@@ -81,7 +91,7 @@ void AvPlayer::_prepare_t() {
         AVCodec *dec = avcodec_find_decoder(parameters->codec_id);
         if (!dec){
             helper->onError(FFMPEG_FIND_DECODER_FAIL,THREAD_CHILD);
-            return;
+            goto ERROR;
         }
 
         //获取解码上下文
@@ -90,13 +100,20 @@ void AvPlayer::_prepare_t() {
         //把解码信息赋值给解码上下文中各成员
         if (avcodec_parameters_to_context(codecContext,parameters) < 0){
             helper->onError(FFMPEG_CODEC_CONTEXT_PARAMETERS_FAIL,THREAD_CHILD);
-            return;
+            goto ERROR;
+        }
+
+        // 多线程解码
+        if(parameters->codec_type == AVMEDIA_TYPE_VIDEO){
+            codecContext->thread_count = 8;
+        } else if (parameters->codec_type == AVMEDIA_TYPE_AUDIO){
+            codecContext->thread_count = 1;
         }
 
         //打开解码器
         if (avcodec_open2(codecContext,dec, nullptr) !=0){
             helper->onError(FFMPEG_OPEN_DECODER_FAIL,THREAD_CHILD);
-            return;
+            goto ERROR;
         }
 
         //音频
@@ -104,20 +121,32 @@ void AvPlayer::_prepare_t() {
             audioChannel = new AudioChannel(i,helper,codecContext,avStream->time_base);
             //视频
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO){
-            //获得帧率
-            int fps = av_q2d(avStream->avg_frame_rate);
+            //获得帧率 每秒显示帧数
+            double fps = av_q2d(avStream->avg_frame_rate);
+            if(isnan(fps) || fps == 0){
+                fps = av_q2d(avStream->r_frame_rate);
+            }
+
+            if (isnan(fps) || fps == 0){
+                fps = av_q2d(av_guess_frame_rate(avFormatContext,avStream, nullptr));
+            }
             //创建videoChannel，用来之后的解码＆播放
             videoChannel = new VideoChannel(i,helper,codecContext,avStream->time_base,fps);
+            videoChannel->setWindow(window);
         }
     }
 
     //如果媒体文件中没有视频 & 没有音频
     if (!videoChannel && !audioChannel){
         helper->onError(FFMPEG_NOMEDIA,THREAD_CHILD);
-        return;
+        goto ERROR;
     }
     //call java　已准备好，可以播放了
     helper->onPrepared(THREAD_CHILD);
+    return;
+    ERROR:
+    LOGD(TAG,"error and then to release");
+    release();
 }
 
 void *start_t(void *args) {
@@ -132,6 +161,7 @@ void AvPlayer::start() {
     LOGD(TAG,"start called");
     isPlaying = true;
     if (videoChannel){
+        videoChannel->audioChannel = audioChannel;
         videoChannel->play();
     }
 
@@ -161,11 +191,15 @@ void AvPlayer::_start_t() {
             }
         }else if(ret == AVERROR_EOF){
             //读取完毕，不一定播放完毕
-            if(videoChannel->pktQueue.empty() &&
-            videoChannel->frameQueue.empty()){
+            if(videoChannel->pktQueue.empty()
+            && videoChannel->frameQueue.empty()
+            && audioChannel->pktQueue.empty()
+            && audioChannel->frameQueue.empty()){
+                //播放完毕
                 break;
             }
         } else{
+            LOGE(TAG,"读取数据包失败，返回:%d 错误描述:%s", ret, av_err2str(ret));
             break;
         }
     }
@@ -182,6 +216,30 @@ void AvPlayer::setWindow(ANativeWindow *nativeWindow) {
     }
 }
 
+
+void AvPlayer::stop() {
+    isPlaying = false;
+    pthread_join(prepareTd, nullptr);
+    pthread_join(startTask, nullptr);
+
+    release();
+}
+
+void AvPlayer::release() {
+    if (audioChannel) {
+        delete audioChannel;
+        audioChannel = nullptr;
+    }
+    if (videoChannel) {
+        delete videoChannel;
+        videoChannel = nullptr;
+    }
+    if (avFormatContext) {
+        avformat_close_input(&avFormatContext);
+        avformat_free_context(avFormatContext);
+        avFormatContext = nullptr;
+    }
+}
 
 
 

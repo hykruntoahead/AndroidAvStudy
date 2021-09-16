@@ -13,6 +13,7 @@
 extern "C"{
 #include <libswresample/swresample.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/time.h>
 };
 
 class AudioChannel : public BaseChannel{
@@ -36,6 +37,7 @@ public:
 private:
     void _play();
     int _getData();
+    void _releaseOpenSL();
 
 private:
     pthread_t audioDecodeTask, audioPlayTask;
@@ -44,6 +46,13 @@ private:
     int bufferCount;
     int out_channels;
     int out_sampleSize;
+
+    SLObjectItf engineObject = NULL;
+    SLEngineItf engineInterface = NULL;
+    SLObjectItf outputMixObject = NULL;
+    SLObjectItf bqPlayerObject = NULL;
+    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue = NULL;
+    SLPlayItf bqPlayerInterface = NULL;
 };
 
 

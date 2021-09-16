@@ -25,10 +25,13 @@ class AvPlayer {
 public:
     AvPlayer(JavaCallbackHelper *helper);
 
+    ~AvPlayer();
+
 public:
     void setDataSource(const char *path_);
     void prepare();
     void start();
+    void stop();
     void setWindow(ANativeWindow *nativeWindow);
 
 private:
@@ -48,6 +51,8 @@ private:
     void _prepare_t();
 
     void _start_t();
+
+    void release();
 };
 
 
